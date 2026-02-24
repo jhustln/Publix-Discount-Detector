@@ -42,3 +42,12 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 Run the scraper:
 
 python publix_deal_scraper.py
+
+# HOW TO AUTOMATE WITH DISCORD WEBHOOKS
+
+Build Docker image:
+**MUST DOWNLOAD AUTOMATED VERSION OF SCRIPT**
+docker build -f Dockerfile.k8s -t publix-scraper:latest .
+
+Run the image: docker run -it --rm -e SEARCH_ITEMS="<ITEM>" -e STORE_NUMBER="<4-DIGIT STORE NUMBER>" -e DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/123456789/blahblahblah" publix-scraper:latest
+

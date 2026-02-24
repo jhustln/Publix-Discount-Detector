@@ -1,6 +1,5 @@
 FROM python:3.11-slim
 
-# Install Chrome and dependencies
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
@@ -13,30 +12,24 @@ RUN apt-get update && apt-get install -y \
     && apt-get install -y google-chrome-stable \
     && rm -rf /var/lib/apt/lists/*
 
-# Install ChromeDriver
 RUN CHROMEDRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE) && \
     wget -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip && \
     unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/ && \
     rm /tmp/chromedriver.zip && \
     chmod +x /usr/local/bin/chromedriver
 
-# Create app directory
 WORKDIR /app
 
-# Copy requirements and install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the automated script
 COPY publix_deal_scraper.py .
 
-# Create non-root user for security
 RUN useradd -m -u 1000 scraper && \
     chown -R scraper:scraper /app && \
     mkdir -p /tmp && \
     chown -R scraper:scraper /tmp
 
-# Switch to non-root user
 USER scraper
 
 # Set environment variables (can be overridden in Kubernetes)
@@ -44,5 +37,5 @@ ENV SEARCH_ITEMS=chicken
 ENV STORE_NUMBER=""
 ENV DISCORD_WEBHOOK_URL=""
 
-# Run the automated script
+
 CMD ["python", "publix_deal_scraper.py"]

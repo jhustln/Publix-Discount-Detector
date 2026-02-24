@@ -67,4 +67,5 @@ metadata:
 type: Opaque
 stringData:
   # Replace with your actual Discord webhook URL
+
   discord-webhook-url: "https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN"

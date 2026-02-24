@@ -1,5 +1,6 @@
 FROM python:3.11-slim
 
+
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
@@ -12,18 +13,24 @@ RUN apt-get update && apt-get install -y \
     && apt-get install -y google-chrome-stable \
     && rm -rf /var/lib/apt/lists/*
 
-RUN CHROMEDRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE) && \
-    wget -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip && \
-    unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/ && \
-    rm /tmp/chromedriver.zip && \
-    chmod +x /usr/local/bin/chromedriver
+
+RUN CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d '.' -f 1) && \
+    echo "Chrome version: $CHROME_VERSION" && \
+    CHROMEDRIVER_VERSION=$(curl -sS "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${CHROME_VERSION}") && \
+    echo "Installing ChromeDriver version: $CHROMEDRIVER_VERSION" && \
+    wget -O /tmp/chromedriver.zip "https://storage.googleapis.com/chrome-for-testing-public/${CHROMEDRIVER_VERSION}/linux64/chromedriver-linux64.zip" && \
+    unzip /tmp/chromedriver.zip -d /tmp/ && \
+    mv /tmp/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver && \
+    chmod +x /usr/local/bin/chromedriver && \
+    rm -rf /tmp/chromedriver.zip /tmp/chromedriver-linux64
 
 WORKDIR /app
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY publix_deal_scraper.py .
+# Copy the automated script ONLY (not the interactive one)
+COPY publix_deal_scraperAutomated.py .
 
 RUN useradd -m -u 1000 scraper && \
     chown -R scraper:scraper /app && \
@@ -36,6 +43,3 @@ USER scraper
 ENV SEARCH_ITEMS=chicken
 ENV STORE_NUMBER=""
 ENV DISCORD_WEBHOOK_URL=""
-
-
-CMD ["python", "publix_deal_scraper.py"]
